@@ -43,3 +43,20 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
                          color=object$highlight_color,
                          show.legend=FALSE)
 }
+
+# glow_nodes <- function() {
+
+#     layers <- 10
+#     size <- 8
+#     glow_size <- 1.5
+#     aes_list[["fill"]] <- NA
+#     geom_param_list[["fill"]] <- NA
+#     aes_list[["alpha"]] <- 1
+#     for (i in seq_len(layers+1)){
+#       geom_param_list[["size"]] <- size+(glow_size*i)
+#       plot <- plot + geom_node_point(c(aes_list,
+#                            aes(filter=.data$name %in% nd$name)),
+#                          color=object$highlight_color,
+#                          show.legend=FALSE)
+#     }
+# }
