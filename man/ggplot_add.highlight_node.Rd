@@ -4,7 +4,7 @@
 \alias{ggplot_add.highlight_node}
 \title{ggplot_add.highlight_node}
 \usage{
-ggplot_add.highlight_node(object, plot, object_name)
+\method{ggplot_add}{highlight_node}(object, plot, object_name)
 }
 \arguments{
 \item{object}{An object to add to the plot}
