@@ -27,4 +27,4 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
-<img src="man/figures/README-unnamed-chunk-1-1.png" width="700" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />

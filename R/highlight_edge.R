@@ -76,7 +76,9 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   aes_list <- plot$layers[[candl]]$mapping
   ## Do not reflect to legends
   geom_param_list <- plot$layers[[candl]]$geom_params
-  geom_param_list[["color"]] <- object$highlight_color
+  if (!object$glow) {
+    geom_param_list[["color"]] <- object$highlight_color
+  }
   geom_param_list[["show.legend"]] <- FALSE
   geom_param_list["na.rm"] <- NULL
   geom_param_list["interpolate"] <- NULL
