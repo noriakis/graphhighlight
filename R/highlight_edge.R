@@ -1,11 +1,13 @@
-
+#' @export
 highlight_edge <- function(edge_name=NULL,
-  highlight_color="red", directed=TRUE, filter=NULL) {
+  highlight_color="red", directed=TRUE, filter=NULL,
+  change_label_color=TRUE) {
 
   structure(list(edge_name = edge_name,
                  highlight_color = highlight_color,
                  directed = directed,
-                 filter = filter),
+                 filter = filter,
+                 change_label_color = change_label_color),
             class = "highlight_edge")
 }
 
@@ -50,7 +52,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
     candidate_edge_id <- ed$edge.id
   }
   if (length(candidate_edge_id)==0) {stop("There is no edge specified")}
-  
+
   ## Plan 1
   ## `+theme_graph()` will not work after this modification
   ## Also slow
@@ -73,8 +75,24 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   geom <- paste0("geom_",substr(se, 5, 8),"_",substr(se, 9, nchar(se)))
   aes_list <- plot$layers[[candl]]$mapping
   ## Do not reflect to legends
-  plot + eval(parse(text = geom))(c(aes_list,
-                                    aes(filter=edge.id %in% candidate_edge_id)),
-                                  color=object$highlight_color,show.legend=FALSE)
+  geom_param_list <- plot$layers[[candl]]$geom_params
+  geom_param_list[["color"]] <- object$highlight_color
+  geom_param_list[["show.legend"]] <- FALSE
+  geom_param_list["na.rm"] <- NULL
+  geom_param_list["interpolate"] <- NULL
+  current_end_cap <- unique(ggplot_build(plot)$data[[candl]]$end_cap)
+  if (!is.na(current_end_cap)) {
+    geom_param_list[["end_cap"]] <- current_end_cap
+  }
+  if (object$change_label_color) {
+    geom_param_list[["label_colour"]] <- object$highlight_color
+  }
+  # plot + eval(parse(text = geom))(c(aes_list,
+  #                                   aes(filter=edge.id %in% candidate_edge_id)),
+  #                                 color=object$highlight_color,show.legend=FALSE)
+  plot + do.call(eval(parse(text = geom)),
+    c(list(mapping=c(aes_list,aes(filter=edge.id %in% candidate_edge_id))),
+       geom_param_list))
+
   
 }

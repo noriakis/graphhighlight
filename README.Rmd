@@ -1,11 +1,31 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  fig.dev = "grDevices::png",
+  dpi = 96L,
+  dev.args = list(),
+  fig.ext = "png",
+  fig.width = 700 / 96,
+  fig.height = NULL,
+  fig.retina = 2L,
+  fig.asp = 1 / 1.618,
+  fig.align = "center"
+)
+```
 
 # graphhighlight
 
 This package highlights nodes and edges of ggraph plot.
 
-``` r
+```{r, message=FALSE, warning=FALSE}
 library(ggraph)
 library(igraph)
 library(graphhighlight)
@@ -26,5 +46,3 @@ ggraph(g, layout="nicely")+
   highlight_node(filter="size>6",highlight_color = "green")+
   theme_graph()
 ```
-
-<img src="man/figures/README-unnamed-chunk-1-1.png" width="700" style="display: block; margin: auto;" />

@@ -1,3 +1,4 @@
+#' @export
 highlight_node <- function(node_name=NULL,
   highlight_color="red", filter=NULL) {
   structure(list(node_name = node_name,
