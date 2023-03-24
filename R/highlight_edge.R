@@ -1,8 +1,11 @@
 
-highlight_edge <- function(edge_name, highlight_color="red", directed=TRUE) {
+highlight_edge <- function(edge_name=NULL,
+  highlight_color="red", directed=TRUE, filter=NULL) {
+
   structure(list(edge_name = edge_name,
                  highlight_color = highlight_color,
-                 directed = directed),
+                 directed = directed,
+                 filter = filter),
             class = "highlight_edge")
 }
 
@@ -13,31 +16,44 @@ highlight_edge <- function(edge_name, highlight_color="red", directed=TRUE) {
 #' @export ggplot_add.highlight_edge
 #' @export
 ggplot_add.highlight_edge <- function(object, plot, object_name) {
-  ## Plan 1
-  ## `+theme_graph()` will not work after this modification
-  ## Also slow
-  if (is.vector(object$edge_name)) {
-    frs <- object$edge_name[1]
-    tos <- object$edge_name[2]
-  } else {
-    frs <- object$edge_name[,1]
-    tos <- object$edge_name[,2]
-  }
   ed <- get_edges()(plot$data)
-  if (object$directed) {
-    ed <- ed[ ed$node1.name %in% frs, ]
-    ed <- ed[ ed$node2.name %in% tos, ]
-    candidate_edge_id <- ed$edge.id
-  } else {
-    candidate_edge_id <- NULL
-    for (i in seq_len(length(frs))) {
-      candidate_edge_id <- c(candidate_edge_id,
-       ed[ ed$node1.name %in% c(frs[i], tos[i]) & 
-             ed$node2.name %in% c(frs[i], tos[i]), ]$edge.id)
+  ## TODO: no text evaluation
+  if (!is.null(object$filter)) {
+    ed <- subset(ed, eval(parse(text=object$filter)))
+  }
+
+
+  if (!is.null(object$edge_name)) {
+
+    if (is.vector(object$edge_name)) {
+      frs <- object$edge_name[1]
+      tos <- object$edge_name[2]
+    } else {
+      frs <- object$edge_name[,1]
+      tos <- object$edge_name[,2]
     }
+
+    if (object$directed) {
+      ed <- ed[ ed$node1.name %in% frs, ]
+      ed <- ed[ ed$node2.name %in% tos, ]
+      candidate_edge_id <- ed$edge.id
+    } else {
+      candidate_edge_id <- NULL
+      for (i in seq_len(length(frs))) {
+        candidate_edge_id <- c(candidate_edge_id,
+         ed[ ed$node1.name %in% c(frs[i], tos[i]) & 
+               ed$node2.name %in% c(frs[i], tos[i]), ]$edge.id)
+      }
+    }
+
+  } else {
+    candidate_edge_id <- ed$edge.id
   }
   if (length(candidate_edge_id)==0) {stop("There is no edge specified")}
   
+  ## Plan 1
+  ## `+theme_graph()` will not work after this modification
+  ## Also slow
   # build <- ggplot_build(plot)
   # re <- build$data[[1]]
   # re[ re$group %in% candidate_edge_id, "edge_colour" ] <- object$highlight_color
