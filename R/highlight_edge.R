@@ -82,6 +82,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   geom_param_list[["show.legend"]] <- FALSE
   geom_param_list["na.rm"] <- NULL
   geom_param_list["interpolate"] <- NULL
+  
   build <- ggplot_build(plot)
   current_end_cap <- unique(build$data[[candl]]$end_cap)
   minimum_edge_width <- min(build$data[[candl]]$edge_width)
@@ -96,7 +97,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   #                                 color=object$highlight_color,show.legend=FALSE)
 
   if (object$glow) {
-    glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list, minimum_edge_width)
+    glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list)
   } else {
     plot + do.call(eval(parse(text = geom)),
       c(list(mapping=c(aes_list,aes(filter=edge.id %in% candidate_edge_id))),
@@ -107,9 +108,8 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
 }
 
 
-glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list, minimum_edge_width) {
+glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list) {
   layers <- 10
-  # size <- 8
   edge_size <- 0.01
   glow_edge_size <- 0.3
   geom_param_list[["position"]] <- "identity"
