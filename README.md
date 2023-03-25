@@ -45,3 +45,22 @@ ggraph(g, layout="nicely")+
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="768" style="display: block; margin: auto;" />
+
+``` r
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size, color=size))+
+  scale_size(range=c(1,10))+
+  scale_color_gradient(low="blue",high="red")+
+  scale_edge_width(range=c(0,2.5))+
+  geom_edge_link(aes(width=.data$weight),
+                arrow = arrow(length = unit(4, 'mm')), 
+                end_cap = circle(5, 'mm'),
+                start_cap = circle(5, "mm"))+
+  highlight_node(filter="size<5",
+                 highlight_by_shape = TRUE,
+                 specify_shape=21,
+                 specify_shape_size=21)+
+  theme_graph()
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" />

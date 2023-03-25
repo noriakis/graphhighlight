@@ -1,17 +1,23 @@
 
 #' @export
 highlight_node <- function(node_name=NULL,
-                           highlight_color="red",
+                           highlight_color=NULL,
                            filter=NULL,
                            glow=FALSE,
                            glow_fixed_color=FALSE,
-                           glow_base_size=FALSE) {
+                           glow_base_size=FALSE,
+                           highlight_by_shape=FALSE,
+                           specify_shape=NULL,
+                           specify_shape_size=NULL) {
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
                  filter = filter,
                  glow = glow,
                  glow_fixed_color = glow_fixed_color,
-                 glow_base_size = glow_base_size),
+                 glow_base_size = glow_base_size,
+                 highlight_by_shape = highlight_by_shape,
+                 specify_shape = specify_shape,
+                 specify_shape_size = specify_shape_size),
             class = "highlight_node")
 }
 
@@ -46,7 +52,9 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   if (is.null(candl)) {stop("No geom_node_point found")}
   geom_param_list <- plot$layers[[candl]]$geom_params
   if (!object$glow) {
-    geom_param_list[["color"]] <- object$highlight_color
+    if (!is.null(object$highlight_color)) {
+      geom_param_list[["color"]] <- object$highlight_color
+    }
   }
   geom_param_list[["show.legend"]] <- FALSE
   geom_param_list["na.rm"] <- NULL
@@ -56,9 +64,20 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
     glow_nodes(plot, aes_list, nd$name, geom_param_list, object$glow_base_size, candl,
       object$glow_fixed_color, object$highlight_color)  
   } else {
-    plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
-                                                    aes(filter=.data$name %in% nd$name))),
-                                     geom_param_list))
+    if (object$highlight_by_shape) {
+      if (is.null(object$specify_shape)) {stop("Please specify shape")}
+      if (is.null(object$specify_shape_size)) {stop("Please specify shape size")}
+      geom_param_list[["shape"]] <- object$specify_shape
+      base_size <- ggplot_build(plot)$data[[candl]][plot$data$name %in% nd$name,]$size
+      geom_param_list[["size"]] <- base_size + object$specify_shape_size
+      plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
+                                                      aes(filter=.data$name %in% nd$name))),
+                                       geom_param_list))
+    } else {
+      plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
+                                                      aes(filter=.data$name %in% nd$name))),
+                                       geom_param_list))      
+    }
   }
 }
 
