@@ -86,16 +86,13 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
   for (i in seq_len(layers+1)){
     if (glow_base_size) {
       geom_param_list[["size"]] <- base_size + (glow_size*i)
-      plot <- plot + do.call(geom_node_point,
-                             c(list(mapping=c(aes_list,
-                                              aes(filter=.data$name %in% candidate_node_id))),
-                               geom_param_list))
     } else {
       geom_param_list[["size"]] <- size+(glow_size*i)
-      plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
-                                                              aes(filter=.data$name %in% candidate_node_id))),
-                                               geom_param_list))
     }
+    plot <- plot + do.call(geom_node_point,
+                       c(list(mapping=c(aes_list,
+                                        aes(filter=.data$name %in% candidate_node_id))),
+                         geom_param_list))
   }
   plot+scale_alpha(range=c(0.01, 0.1),guide="none")
 }

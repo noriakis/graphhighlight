@@ -1,13 +1,17 @@
 #' @export
 highlight_edge <- function(edge_name=NULL,
   highlight_color="red", directed=TRUE, filter=NULL,
-  change_label_color=TRUE, glow=FALSE) {
+  change_label_color=TRUE, glow=FALSE, glow_fixed_color=FALSE,
+  glow_base_size=FALSE, glow_edge_size=0.3) {
 
   structure(list(edge_name = edge_name,
                  highlight_color = highlight_color,
                  directed = directed,
                  filter = filter, glow=glow,
-                 change_label_color = change_label_color),
+                 change_label_color = change_label_color,
+                 glow_fixed_color=glow_fixed_color,
+                 glow_base_size=glow_base_size,
+                 glow_edge_size=glow_edge_size),
             class = "highlight_edge")
 }
 
@@ -97,7 +101,9 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   #                                 color=object$highlight_color,show.legend=FALSE)
 
   if (object$glow) {
-    glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list)
+    glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list,
+      object$highlight_color, object$glow_fixed_color, object$glow_base_size,
+      build, candl, object$glow_edge_size)
   } else {
     plot + do.call(eval(parse(text = geom)),
       c(list(mapping=c(aes_list,aes(filter=edge.id %in% candidate_edge_id))),
@@ -108,19 +114,34 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
 }
 
 
-glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list) {
+glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list,
+  highlight_color, glow_fixed_color, glow_base_size, build, candl, glow_edge_size) {
   layers <- 10
   edge_size <- 0.01
-  glow_edge_size <- 0.3
   geom_param_list[["position"]] <- "identity"
   aes_list["width"] <- NULL
   aes_list[["edge_alpha"]] <- 1
-  for (i in seq_len(layers+1)){
-      geom_param_list[["edge_width"]] <- edge_size+(glow_edge_size*i)
-      plot <- plot + do.call(eval(parse(text = geom)),
-      c(list(mapping=c(aes_list,
-        aes(filter=edge.id %in% candidate_edge_id))),
-        geom_param_list))
+
+  ## again?
+  # ed <- get_edges()(plot$data)
+  ed <- build$data[[candl]]
+  base_edge_size <- ed[ed$group %in% candidate_edge_id,]$edge_width
+
+  if (glow_fixed_color) {
+    aes_list["color"] <- NULL
+    geom_param_list[["color"]] <- highlight_color
   }
+
+  for (i in seq_len(layers+1)){
+    if (glow_base_size) {
+      geom_param_list[["edge_width"]] <- base_edge_size+(glow_edge_size*i)
+    } else {## Fixed edge width
+      geom_param_list[["edge_width"]] <- edge_size+(glow_edge_size*i)
+    }
+    plot <- plot + do.call(eval(parse(text = geom)),
+    c(list(mapping=c(aes_list,
+      aes(filter=edge.id %in% candidate_edge_id))),
+      geom_param_list))
+    }
   plot+scale_edge_alpha(range=c(0.01, 0.1),guide="none")
 }

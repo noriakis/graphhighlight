@@ -3,7 +3,7 @@
 
 # graphhighlight
 
-This package highlights nodes and edges of ggraph plot.
+This package highlights nodes and edges of `ggraph` plot.
 
 ``` r
 library(ggraph)
@@ -27,4 +27,21 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
-<img src="man/figures/README-unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-1-1.png" width="768" style="display: block; margin: auto;" />
+
+``` r
+ggraph(g, layout="nicely")+
+  geom_edge_diagonal(aes(width=.data$weight,
+                         color=.data$weight))+
+  geom_node_point(aes(size=size))+
+  geom_node_text(aes(label=name), repel=TRUE)+
+  scale_edge_color_gradient(low="blue",high="red")+
+  highlight_node(node_name="a")+
+  highlight_edge(filter="weight<5",
+                 glow=TRUE,
+                 glow_base_size=TRUE,
+                 glow_edge_size=0.8)+
+  theme_graph()
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="768" style="display: block; margin: auto;" />
