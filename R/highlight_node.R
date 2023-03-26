@@ -46,6 +46,9 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   for (l in seq_along(plot$layers)) {
     st <- plot$layers[[l]]$geom
     if (sum(grepl("GeomPoint", attributes(st)$class))>0){
+      if (!is.null(candl)) {
+        message("multiple geom_node_point found, taking the last layer")
+      }
       candl <- l
     }
   }
