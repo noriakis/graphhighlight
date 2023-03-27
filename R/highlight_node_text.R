@@ -26,7 +26,7 @@ highlight_node_text <- function(node_name=NULL,
 #' @param object An object to add to the plot
 #' @param plot The ggplot object to add object to
 #' @param object_name The name of the object to add
-#' @export ggplot_add.highlight_node
+#' @export ggplot_add.highlight_node_text
 #' @export
 ggplot_add.highlight_node_text <- function(object, plot, object_name) {
 

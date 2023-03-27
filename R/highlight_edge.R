@@ -89,9 +89,13 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   
   build <- ggplot_build(plot)
   current_end_cap <- unique(build$data[[candl]]$end_cap)
-  minimum_edge_width <- min(build$data[[candl]]$edge_width)
+  current_start_cap <- unique(build$data[[candl]]$start_cap)
+  # minimum_edge_width <- min(build$data[[candl]]$edge_width)
   if (!is.na(current_end_cap)) {
     geom_param_list[["end_cap"]] <- current_end_cap
+  }
+  if (!is.na(current_start_cap)) {
+    geom_param_list[["start_cap"]] <- current_start_cap
   }
   if (object$change_label_color) {
     geom_param_list[["label_colour"]] <- object$highlight_color
@@ -131,7 +135,7 @@ glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list
     aes_list["color"] <- NULL
     geom_param_list[["color"]] <- highlight_color
   }
-
+  # geom_param_list["arrow"] <- NULL
   for (i in seq_len(layers+1)){
     if (glow_base_size) {
       geom_param_list[["edge_width"]] <- base_edge_size+(glow_edge_size*i)

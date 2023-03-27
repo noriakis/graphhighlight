@@ -29,6 +29,7 @@ highlight_node <- function(node_name=NULL,
 #' @param object An object to add to the plot
 #' @param plot The ggplot object to add object to
 #' @param object_name The name of the object to add
+#' @importFrom ggplot2 ggplot_add
 #' @export ggplot_add.highlight_node
 #' @export
 ggplot_add.highlight_node <- function(object, plot, object_name) {
@@ -38,14 +39,12 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   if (!is.null(object$filter)) {
     nd <- subset(nd, eval(parse(text=object$filter)))
   }
-  filter_nodes <- nd$name
-  
   if (!is.null(object$node_name)) {
-    nd <- nd[ nd$name %in% intersect(filter_nodes, object$node_name), ]
-  } else {
-    nd <- nd[ nd$name %in% filter_nodes, ]
+    nd <- nd[ nd$name %in% object$node_name, ]
   }
   
+  candidate_node_id <- nd$.ggraph.orig_index
+
   candl <- NULL
   for (l in seq_along(plot$layers)) {
     st <- plot$layers[[l]]$geom
@@ -68,22 +67,25 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   aes_list <- plot$layers[[candl]]$mapping
   
   if (object$glow) {
-    glow_nodes(plot, aes_list, nd$name, geom_param_list, object$glow_base_size, candl,
+    glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
       object$glow_fixed_color, object$highlight_color, object$glow_size)  
   } else {
     if (object$highlight_by_shape) {
       if (is.null(object$specify_shape)) {stop("Please specify shape")}
       if (is.null(object$specify_shape_size)) {stop("Please specify shape size")}
       geom_param_list[["shape"]] <- object$specify_shape
-      base_size <- ggplot_build(plot)$data[[candl]][plot$data$name %in% nd$name,]$size
+      base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index
+       %in% candidate_node_id,]$size
       geom_param_list[["size"]] <- base_size + object$specify_shape_size
       geom_param_list[["color"]] <- object$shape_color
       plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
-                                                      aes(filter=.data$name %in% nd$name))),
+                                                      aes(filter=.data$.ggraph.orig_index 
+                                                        %in% candidate_node_id))),
                                        geom_param_list))
     } else {
       plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
-                                                      aes(filter=.data$name %in% nd$name))),
+                                                      aes(filter=.data$.ggraph.orig_index 
+                                                        %in% candidate_node_id))),
                                        geom_param_list))      
     }
   }
@@ -106,7 +108,7 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
   }
 
   if (glow_base_size) {
-    base_size <- ggplot_build(plot)$data[[candl]][plot$data$name %in% candidate_node_id,]$size
+    base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index %in% candidate_node_id,]$size
   }
 
   for (i in seq_len(layers+1)){
@@ -117,7 +119,7 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
     }
     plot <- plot + do.call(geom_node_point,
                        c(list(mapping=c(aes_list,
-                                        aes(filter=.data$name %in% candidate_node_id))),
+                                        aes(filter=.data$.ggraph.orig_index %in% candidate_node_id))),
                          geom_param_list))
   }
   plot+scale_alpha(range=c(0.01, 0.1),guide="none")

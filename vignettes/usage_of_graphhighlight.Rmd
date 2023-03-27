@@ -2,13 +2,19 @@
 title: "graphhighlight"
 author: "Noriaki Sato"
 date: "2023-03-27"
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{graphhighlight}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       fig.width=8,
-                      fig.height=8)
+                      fig.height=8,
+                      warning=FALSE,
+                      message=FALSE)
 ```
 
 # graphhighlight
@@ -95,9 +101,107 @@ The same glowing function is implemented for highlighting edges in `highlight_ed
 
 ## highlight_edge
 
+Edges can be highlighted in the same way as `highlight_node`.
+
+```{r edge1, warning=FALSE}
+ggraph(g, layout="nicely")+
+  geom_edge_diagonal(aes(width=weight,
+                         color=weight))+
+  scale_edge_color_gradient(low="blue",high="red")+
+  highlight_edge(filter="weight>7",
+                 highlight_color="pink")+
+  theme_graph()
+```
+
+The same can be performed for the other geoms.
+
+```{r edge2, warning=FALSE}
+ggraph(g, layout="nicely")+
+  geom_edge_bend2(aes(width=weight,
+                         color=weight))+
+  scale_edge_color_gradient(low="blue",high="red")+
+  highlight_edge(filter="weight>7",
+                 highlight_color="pink")+
+  theme_graph()
+```
+
+With the arrows.
+
+```{r edge3, warning=FALSE}
+
+ggraph(g, layout="nicely")+
+  geom_edge_link(aes(width=weight),
+              arrow = arrow(length = unit(4, 'mm')), 
+              end_cap = circle(5, 'mm'),
+              start_cap = circle(5, "mm"))+
+  highlight_edge(filter="weight<5",
+                 highlight_color="steelblue")+
+  theme_graph()
+
+```
+
+Glowing function can be applied by specifying `glow` to `TRUE`. `geom_edge_size` controls how big the glowing will be. Note that specifying big number will deteriorate the looking.
+
+```{r edge4, warning=FALSE}
+
+ggraph(g, layout="nicely")+
+  geom_edge_link(aes(width=weight),
+              arrow = arrow(length = unit(4, 'mm')), 
+              end_cap = circle(5, 'mm'),
+              start_cap = circle(5, "mm"))+
+  highlight_edge(filter="weight<5",
+                 glow=TRUE,
+                 highlight_color="steelblue",
+                 glow_edge_size =0.5,
+                 glow_fixed_color = TRUE,
+                 glow_base_size =TRUE )+
+  theme_graph()
+```
+
+Coloring of edge labels is controlled by `change_label_color`.
+
+```{r edge5, warning=FALSE}
+ggraph(g, layout="nicely")+
+  geom_edge_link(aes(width=weight,
+                     label=weight),
+              angle_calc="along",
+              label_dodge = unit(5, 'mm'),
+              position="identity",
+              arrow = arrow(length = unit(4, 'mm')), 
+              end_cap = circle(5, 'mm'),
+              start_cap = circle(5, "mm"))+
+  highlight_edge(filter="weight>5",
+                 change_label_color=TRUE,
+                 highlight_color="red")+
+  theme_graph()
+```
+
 ## highlight_node_text
 
+```{r text1}
+ggraph(g, layout="nicely")+
+  geom_node_text(aes(label=name, color=size), repel=TRUE, bg.colour="grey")+
+  highlight_node_text(filter="size>5",highlight_color = "red")+
+  theme_graph()
+```
+
 ## Combine
+
+```{r combine}
+g <- random.graph.game(100,0.05,directed=FALSE)
+E(g)$weight <- sample(1:10, length(E(g)), replace=TRUE)
+V(g)$size <- sample(1:10, length(V(g)), replace=TRUE)
+V(g)$size <- sample(1:10, length(V(g)), replace=TRUE)
+
+ggraph(g, layout="circle") +
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  geom_edge_diagonal(aes(color=weight))+
+  scale_edge_color_viridis(guide="none")+
+  highlight_node(filter="size>0",glow=TRUE,glow_base_size = TRUE)+
+  highlight_edge(filter="weight>0",glow=TRUE,glow_base_size = TRUE)+
+  theme_graph()
+```
 
 
 ```{r}
