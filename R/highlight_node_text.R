@@ -63,7 +63,6 @@ ggplot_add.highlight_node_text <- function(object, plot, object_name) {
   if (is.null(candl)) {stop("No geom_node_text found")}
   plot$layers[[candl]]$geom_params[["seed"]] <- object$seed
   geom_param_list <- plot$layers[[candl]]$geom_params
-  print(geom_param_list)
 
   if (is.null(object$highlight_color)) {
     stop("Please specify highlight_color")
