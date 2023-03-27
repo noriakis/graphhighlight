@@ -1,0 +1,105 @@
+---
+title: "graphhighlight"
+author: "Noriaki Sato"
+date: "2023-03-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.width=8,
+                      fig.height=8)
+```
+
+# graphhighlight
+
+This package highlights nodes, edges and node texts of ggraph plots when one wants to inspect the graph information after the plots are created.
+
+## Usage
+
+Generate a random graph.
+
+```{r gen, message=FALSE, warning=FALSE}
+library(ggraph)
+library(igraph)
+library(graphhighlight)
+
+set.seed(1)
+g <- random.graph.game(10,0.1,directed=TRUE)
+E(g)$weight <- sample(1:10, length(E(g)), replace=TRUE)
+V(g)$size <- sample(1:10, length(V(g)), replace=TRUE)
+V(g)$name <- letters[1:length(V(g))]
+```
+
+### highlight_node
+
+This function highlights the nodes by specifying `node_name` or `filter` specifying conditions for including nodes in string. If `highlight_color` is specified, the node color will be changed.
+
+```{r node1}
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size))+
+  highlight_node(filter="size>7",
+                 highlight_color="red")+
+  theme_graph()
+```
+
+Or highlighting by some shapes by stacking the layers.
+`highlight_by_shape` specifies highlighting by shape is to be used, and `specify_shape` the shape, `specify_shape_size` the size, `shape_color` the color of the shape.
+
+```{r node2}
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size))+
+  highlight_node(filter="size>7",
+                 highlight_by_shape = TRUE,
+                 specify_shape = 21,
+                 specify_shape_size = 21,
+                 shape_color="red")+
+  theme_graph()
+```
+
+Or by making nodes glowing-look. The argument `glow` should be set to `TRUE`.
+If no `highlight_color` is specified, the raw colors of nodes are used.
+
+```{r node3}
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  highlight_node(filter="size>7",glow=TRUE)+
+  theme_graph()
+```
+If `highlight_color` is specified and `glow_fixed_color` is `TRUE`, that color is used.
+
+```{r node4}
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  highlight_node(filter="size>7",glow=TRUE,
+                 highlight_color="tomato",
+                 glow_fixed_color=TRUE)+
+  theme_graph()
+```
+
+`glow_size` controls how big the glowing will be. `glow_base_size` will use base node size for glowing. Otherwise the same parameters are used for stacking the layers.
+
+```{r node5}
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  highlight_node(filter="size<7",glow=TRUE,
+                 glow_size=5,
+                 glow_base_size = TRUE)+
+  theme_graph()
+```
+
+The same glowing function is implemented for highlighting edges in `highlight_edge`, but not for `highlight_node_text` as for the text, `shadowtext` by Prof. Guangchuang Yu implmented in `geom_node_text` and `geom_text_repel` can highlight the text much better.
+
+## highlight_edge
+
+## highlight_node_text
+
+## Combine
+
+
+```{r}
+sessionInfo()
+```

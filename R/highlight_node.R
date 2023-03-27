@@ -8,16 +8,20 @@ highlight_node <- function(node_name=NULL,
                            glow_base_size=FALSE,
                            highlight_by_shape=FALSE,
                            specify_shape=NULL,
-                           specify_shape_size=NULL) {
+                           specify_shape_size=NULL,
+                           shape_color=NULL,
+                           glow_size=1.2) {
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
                  filter = filter,
                  glow = glow,
                  glow_fixed_color = glow_fixed_color,
                  glow_base_size = glow_base_size,
+                 glow_size=glow_size,
                  highlight_by_shape = highlight_by_shape,
                  specify_shape = specify_shape,
-                 specify_shape_size = specify_shape_size),
+                 specify_shape_size = specify_shape_size,
+                 shape_color = shape_color),
             class = "highlight_node")
 }
 
@@ -65,7 +69,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   
   if (object$glow) {
     glow_nodes(plot, aes_list, nd$name, geom_param_list, object$glow_base_size, candl,
-      object$glow_fixed_color, object$highlight_color)  
+      object$glow_fixed_color, object$highlight_color, object$glow_size)  
   } else {
     if (object$highlight_by_shape) {
       if (is.null(object$specify_shape)) {stop("Please specify shape")}
@@ -73,6 +77,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
       geom_param_list[["shape"]] <- object$specify_shape
       base_size <- ggplot_build(plot)$data[[candl]][plot$data$name %in% nd$name,]$size
       geom_param_list[["size"]] <- base_size + object$specify_shape_size
+      geom_param_list[["color"]] <- object$shape_color
       plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
                                                       aes(filter=.data$name %in% nd$name))),
                                        geom_param_list))
@@ -86,10 +91,9 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
 
 glow_nodes <- function(plot, aes_list, candidate_node_id,
                        geom_param_list, glow_base_size, candl,
-                       glow_fixed_color, highlight_color) {
+                       glow_fixed_color, highlight_color, glow_size) {
   layers <- 10
   size <- 8
-  glow_size <- 1.2
   aes_list[["fill"]] <- NA
   geom_param_list[["fill"]] <- NA
 
