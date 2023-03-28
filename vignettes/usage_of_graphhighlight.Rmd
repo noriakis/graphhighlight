@@ -185,6 +185,16 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
+## highlight_node_label
+
+```{r label1}
+ggraph(g, layout="nicely")+
+  geom_node_label(aes(label=name, color=size), repel=TRUE)+
+  highlight_node_label(filter="size>5",highlight_color = "red", highlight_bg_color = "yellow")+
+  theme_graph()
+```
+
+
 ## Combine
 
 ```{r combine}
