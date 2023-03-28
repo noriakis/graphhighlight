@@ -10,7 +10,8 @@ highlight_node <- function(node_name=NULL,
                            specify_shape=NULL,
                            specify_shape_size=NULL,
                            shape_color=NULL,
-                           glow_size=1.2) {
+                           glow_size=1.2,
+                           override_text=FALSE) {
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
                  filter = filter,
@@ -21,7 +22,8 @@ highlight_node <- function(node_name=NULL,
                  highlight_by_shape = highlight_by_shape,
                  specify_shape = specify_shape,
                  specify_shape_size = specify_shape_size,
-                 shape_color = shape_color),
+                 shape_color = shape_color,
+                 override_text = override_text),
             class = "highlight_node")
 }
 
@@ -68,7 +70,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   aes_list["filter"] <- NULL
 
   if (object$glow) {
-    glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
+    plot <- glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
       object$glow_fixed_color, object$highlight_color, object$glow_size)  
   } else {
     if (object$highlight_by_shape) {
@@ -79,16 +81,21 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
        %in% candidate_node_id,]$size
       geom_param_list[["size"]] <- base_size + object$specify_shape_size
       geom_param_list[["color"]] <- object$shape_color
-      plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
+      plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
                                                       aes(filter=.data$.ggraph.orig_index 
                                                         %in% candidate_node_id))),
                                        geom_param_list))
     } else {
-      plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
+      plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
                                                       aes(filter=.data$.ggraph.orig_index 
                                                         %in% candidate_node_id))),
                                        geom_param_list))      
     }
+  }
+  if (object$override_text) {
+    plot + highlight_node_text(highlight_color=NULL)
+  } else {
+    plot
   }
 }
 

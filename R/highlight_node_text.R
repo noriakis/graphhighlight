@@ -59,18 +59,24 @@ ggplot_add.highlight_node_text <- function(object, plot, object_name) {
   }
   
   if (is.null(candl)) {stop("No geom_node_text found")}
-  plot$layers[[candl]]$geom_params[["seed"]] <- object$seed
+  if (!is.null(plot$layers[[candl]]$geom_params[["seed"]])) {
+    object$seed <- plot$layers[[candl]]$geom_params[["seed"]]
+  } else {
+    plot$layers[[candl]]$geom_params[["seed"]] <- object$seed
+  }
   geom_param_list <- plot$layers[[candl]]$geom_params
 
-  if (is.null(object$highlight_color)) {
-    stop("Please specify highlight_color")
-  }
+  # if (is.null(object$highlight_color)) {
+  #   stop("Please specify highlight_color")
+  # }
 
   geom_param_list[["show.legend"]] <- FALSE
   geom_param_list["na.rm"] <- NULL
   
   build <- ggplot_build(plot)$data[[candl]]
-  build[ plot$data$.ggraph.orig_index %in% candidate_node_id, ]$colour <- object$highlight_color
+  if (!is.null(object$highlight_color)) {
+    build[ plot$data$.ggraph.orig_index %in% candidate_node_id, ]$colour <- object$highlight_color
+  }
   aes_list <- plot$layers[[candl]]$mapping
   aes_list["filter"] <- NULL
 
