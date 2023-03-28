@@ -99,7 +99,7 @@ ggraph(g, layout="nicely")+
 
 The same glowing function is implemented for highlighting edges in `highlight_edge`, but not for `highlight_node_text` as for the text, `shadowtext` by Prof. Guangchuang Yu implmented in `geom_node_text` and `geom_text_repel` can highlight the text much better.
 
-## highlight_edge
+### highlight_edge
 
 Edges can be highlighted in the same way as `highlight_node`.
 
@@ -176,7 +176,7 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
-## highlight_node_text
+### highlight_node_text
 
 ```{r text1}
 ggraph(g, layout="nicely")+
@@ -185,7 +185,7 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
-## highlight_node_label
+### highlight_node_label
 
 ```{r label1}
 ggraph(g, layout="nicely")+
@@ -195,7 +195,7 @@ ggraph(g, layout="nicely")+
 ```
 
 
-## Combine
+### Combine
 
 ```{r combine}
 g <- random.graph.game(100,0.05,directed=FALSE)
