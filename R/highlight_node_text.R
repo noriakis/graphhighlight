@@ -88,10 +88,16 @@ ggplot_add.highlight_node_text <- function(object, plot, object_name) {
   
   # TODO: glowing function, but shadowtext is superior to highlighting.
   # Obtain repelled coordinates to support this option.
+  aes_list["label"] <- NULL
+  aes_list["color"] <- NULL
+  aes_list["colour"] <- NULL
 
-  # Just highlight (stack the layer)
+  ## Storing the other params
+  aes_params <- plot$layers[[candl]]$aes_params
   plot + do.call(geom_node_text,
-                 c(geom_param_list, list(
+                 c(aes_params,
+                  list(mapping=aes_list),
+                  geom_param_list, list(
                    label=build$label,
                     color=build$colour)))
 }

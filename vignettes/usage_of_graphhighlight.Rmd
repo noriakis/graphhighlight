@@ -180,8 +180,8 @@ ggraph(g, layout="nicely")+
 
 ```{r text1}
 ggraph(g, layout="nicely")+
-  geom_node_text(aes(label=name, color=size), repel=TRUE, bg.colour="grey")+
-  highlight_node_text(filter="size>5",highlight_color = "red")+
+  geom_node_text(aes(label=name, color=size, size=size), repel=TRUE, bg.colour="grey")+
+  highlight_node_text(filter="size>6",highlight_color = "red")+
   theme_graph()
 ```
 

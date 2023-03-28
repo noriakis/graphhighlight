@@ -1,4 +1,8 @@
 
+#' highlight_node
+#' highlight the nodes
+#' @param node_name used to subset node data with `name` argument
+#' @param filter used to subset node data specified as string
 #' @export
 highlight_node <- function(node_name=NULL,
                            highlight_color=NULL,
