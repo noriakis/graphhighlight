@@ -72,6 +72,8 @@ ggplot_add.highlight_node_text <- function(object, plot, object_name) {
   build <- ggplot_build(plot)$data[[candl]]
   build[ plot$data$.ggraph.orig_index %in% candidate_node_id, ]$colour <- object$highlight_color
   aes_list <- plot$layers[[candl]]$mapping
+  aes_list["filter"] <- NULL
+
   geom_param_list[["repel"]] <- use_repel
   if (use_repel) {
     geom_param_list[["seed"]] <- object$seed

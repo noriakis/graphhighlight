@@ -80,6 +80,8 @@ ggplot_add.highlight_node_label <- function(object, plot, object_name) {
     build[ plot$data$.ggraph.orig_index %in% candidate_node_id, ]$fill <- object$highlight_bg_color
   }
   aes_list <- plot$layers[[candl]]$mapping
+  aes_list["filter"] <- NULL
+
   geom_param_list[["repel"]] <- use_repel
   if (use_repel) {
     geom_param_list[["seed"]] <- object$seed

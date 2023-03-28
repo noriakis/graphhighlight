@@ -78,6 +78,8 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   se <- tolower(se)
   geom <- paste0("geom_",substr(se, 5, 8),"_",substr(se, 9, nchar(se)))
   aes_list <- plot$layers[[candl]]$mapping
+  aes_list["filter"] <- NULL
+
   ## Do not reflect to legends
   geom_param_list <- plot$layers[[candl]]$geom_params
   if (!object$glow) {

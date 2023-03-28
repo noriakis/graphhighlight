@@ -65,7 +65,8 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   geom_param_list[["show.legend"]] <- FALSE
   geom_param_list["na.rm"] <- NULL
   aes_list <- plot$layers[[candl]]$mapping
-  
+  aes_list["filter"] <- NULL
+
   if (object$glow) {
     glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
       object$glow_fixed_color, object$highlight_color, object$glow_size)  
@@ -98,7 +99,6 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
   size <- 8
   aes_list[["fill"]] <- NA
   geom_param_list[["fill"]] <- NA
-
   aes_list[["alpha"]] <- 1
   aes_list["size"] <- NULL
 
