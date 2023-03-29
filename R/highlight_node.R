@@ -2,7 +2,22 @@
 #' highlight_node
 #' highlight the nodes
 #' @param node_name used to subset node data with `name` argument
+#' @param highlight_color highlighting color
 #' @param filter used to subset node data specified as string
+#' @param glow use glow highlighting
+#' @param glow_fixed_color use glow highlighting with fixed color,
+#' specified by `highlight_color` (default: FALSE, use the raw color of the nodes)
+#' @param glow_base_size use base size of the node for initial size of glowing
+#' @param highlight_by_shape boolean, use shape highlighting
+#' @param shape_number shape number
+#' @param shape_size shape size
+#' @param shape_color shape color 
+#' @param glow_size argument to control how big the glowing will be
+#' @param override_text after highlighting, stack the last geom_node_text layer
+#' @importFrom rlang .data
+#' @importFrom ggplot2 aes ggplot_build scale_alpha
+#' @importFrom ggraph get_nodes get_edges geom_node_text geom_node_point
+#' @importFrom ggraph geom_node_label scale_edge_alpha
 #' @export
 highlight_node <- function(node_name=NULL,
                            highlight_color=NULL,
@@ -11,8 +26,8 @@ highlight_node <- function(node_name=NULL,
                            glow_fixed_color=FALSE,
                            glow_base_size=FALSE,
                            highlight_by_shape=FALSE,
-                           specify_shape=NULL,
-                           specify_shape_size=NULL,
+                           shape_number=NULL,
+                           shape_size=NULL,
                            shape_color=NULL,
                            glow_size=1.2,
                            override_text=FALSE) {
@@ -24,8 +39,8 @@ highlight_node <- function(node_name=NULL,
                  glow_base_size = glow_base_size,
                  glow_size=glow_size,
                  highlight_by_shape = highlight_by_shape,
-                 specify_shape = specify_shape,
-                 specify_shape_size = specify_shape_size,
+                 shape_number = shape_number,
+                 shape_size = shape_size,
                  shape_color = shape_color,
                  override_text = override_text),
             class = "highlight_node")
@@ -78,12 +93,12 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
       object$glow_fixed_color, object$highlight_color, object$glow_size)  
   } else {
     if (object$highlight_by_shape) {
-      if (is.null(object$specify_shape)) {stop("Please specify shape")}
-      if (is.null(object$specify_shape_size)) {stop("Please specify shape size")}
-      geom_param_list[["shape"]] <- object$specify_shape
+      if (is.null(object$shape_number)) {stop("Please specify shape")}
+      if (is.null(object$shape_size)) {stop("Please specify shape size")}
+      geom_param_list[["shape"]] <- object$shape_number
       base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index
        %in% candidate_node_id,]$size
-      geom_param_list[["size"]] <- base_size + object$specify_shape_size
+      geom_param_list[["size"]] <- base_size + object$shape_size
       geom_param_list[["color"]] <- object$shape_color
       plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
                                                       aes(filter=.data$.ggraph.orig_index 
@@ -103,6 +118,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   }
 }
 
+#' @noRd
 glow_nodes <- function(plot, aes_list, candidate_node_id,
                        geom_param_list, glow_base_size, candl,
                        glow_fixed_color, highlight_color, glow_size) {

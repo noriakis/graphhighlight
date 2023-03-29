@@ -1,3 +1,19 @@
+#' highlight_edge
+#' highlight edges
+#' 
+#' @param edge_name edges to highlight
+#' vector of two nodes, or matrix of two nodes
+#' if name argument is not in the graph, index value
+#' @param highlight_color highlighting color
+#' @param directed whether to treat `edge_name` as 
+#' directed or undirected, default to TRUE
+#' @param filter filter arguments of edge attributes in string
+#' @param change_label_color whether to change label colors
+#' @param glow use glow highlighting
+#' @param glow_fixed_color use glow highlighting with fixed color,
+#' specified by `highlight_color` (default: FALSE, use the raw color of the nodes)
+#' @param glow_base_size use base size of the node for initial size of glowing
+#' @param glow_edge_size argument to control how big the glowing will be
 #' @export
 highlight_edge <- function(edge_name=NULL,
   highlight_color="red", directed=TRUE, filter=NULL,
@@ -39,16 +55,25 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
       tos <- object$edge_name[,2]
     }
 
+    if ("name" %in% colnames(ed)) {
+      subset_column <- "name"
+    } else {
+      subset_column <- ".ggraph.orig_index"
+    }
+
+    n1 <- paste0("node1.",subset_column)
+    n2 <- paste0("node2.",subset_column)
+
     if (object$directed) {
-      ed <- ed[ ed$node1.name %in% frs, ]
-      ed <- ed[ ed$node2.name %in% tos, ]
+      ed <- ed[ ed[[n1]] %in% frs, ]
+      ed <- ed[ ed[[n2]] %in% tos, ]
       candidate_edge_id <- ed$edge.id
     } else {
       candidate_edge_id <- NULL
       for (i in seq_len(length(frs))) {
         candidate_edge_id <- c(candidate_edge_id,
-         ed[ ed$node1.name %in% c(frs[i], tos[i]) & 
-               ed$node2.name %in% c(frs[i], tos[i]), ]$edge.id)
+         ed[ ed[[n1]] %in% c(frs[i], tos[i]) & 
+               ed[[n2]] %in% c(frs[i], tos[i]), ]$edge.id)
       }
     }
 
@@ -112,7 +137,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
       build, candl, object$glow_edge_size)
   } else {
     plot + do.call(eval(parse(text = geom)),
-      c(list(mapping=c(aes_list,aes(filter=edge.id %in% candidate_edge_id))),
+      c(list(mapping=c(aes_list,aes(filter=.data$edge.id %in% candidate_edge_id))),
          geom_param_list))    
   }
 
@@ -146,7 +171,7 @@ glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list
     }
     plot <- plot + do.call(eval(parse(text = geom)),
     c(list(mapping=c(aes_list,
-      aes(filter=edge.id %in% candidate_edge_id))),
+      aes(filter=.data$edge.id %in% candidate_edge_id))),
       geom_param_list))
     }
   plot+scale_edge_alpha(range=c(0.01, 0.1),guide="none")

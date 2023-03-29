@@ -57,8 +57,8 @@ ggraph(g, layout="nicely")+
   geom_node_point(aes(size=size))+
   highlight_node(filter="size>7",
                  highlight_by_shape = TRUE,
-                 specify_shape = 21,
-                 specify_shape_size = 21,
+                 shape_number = 21,
+                 shape_size = 21,
                  shape_color="red")+
   theme_graph()
 ```

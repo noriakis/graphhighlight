@@ -5,8 +5,10 @@ Version: 0.1.0
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
 Description: highlighting edges and nodes of ggraph plot
 Depends: ggplot2, ggraph
-Suggests: knitr, rmarkdown
+Imports: rlang
+Suggests: igraph, knitr, rmarkdown
 Encoding: UTF-8
 LazyData: true
+License: MIT + file LICENSE
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
