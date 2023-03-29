@@ -12,6 +12,8 @@
 #' @param shape_number shape number
 #' @param shape_size shape size
 #' @param shape_color shape color 
+#' @param shape_with_text if specified, show text along with shape (21 only)
+#' using `geomtextpath`
 #' @param glow_size argument to control how big the glowing will be
 #' @param override_text after highlighting, stack the last geom_node_text layer
 #' @importFrom rlang .data
@@ -29,6 +31,7 @@ highlight_node <- function(node_name=NULL,
                            shape_number=NULL,
                            shape_size=NULL,
                            shape_color=NULL,
+                           shape_with_text=NULL,
                            glow_size=1.2,
                            override_text=FALSE) {
   structure(list(node_name = node_name,
@@ -42,6 +45,7 @@ highlight_node <- function(node_name=NULL,
                  shape_number = shape_number,
                  shape_size = shape_size,
                  shape_color = shape_color,
+                 shape_with_text = shape_with_text,
                  override_text = override_text),
             class = "highlight_node")
 }
@@ -55,6 +59,8 @@ highlight_node <- function(node_name=NULL,
 #' @export
 ggplot_add.highlight_node <- function(object, plot, object_name) {
   
+  if (!is.null(object$shape_with_text)) {object$shape_number <- 21}
+
   nd <- get_nodes()(plot$data)
   ## TODO: no text evaluation
   if (!is.null(object$filter)) {
@@ -104,6 +110,35 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
                                                       aes(filter=.data$.ggraph.orig_index 
                                                         %in% candidate_node_id))),
                                        geom_param_list))
+      if (!is.null(object$shape_with_text)) {
+        build <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index
+                                          %in% candidate_node_id,]
+        t <- seq(1, -1, length.out = 1000) * pi
+        build$ssize <- sqrt(build$size)/pi/.pt ## Better specification
+        pos <- do.call(rbind,
+                  sapply(seq_len(length(row.names(build))),
+                        function(row) {
+                          data.frame(
+                          x=as.numeric(build[row,"x"]) + 
+                            sin(t)*build[row,"ssize"],
+                          y=as.numeric(build[row,"y"]) + 
+                            cos(t)*build[row,"ssize"],
+                          text=object$shape_with_text,
+                          group=row
+                          )
+                        },
+            simplify=FALSE)) |> data.frame()
+        plot <- plot + geom_textpath(x=pos$x,
+                                      y=pos$y,
+                                      straight=FALSE,
+                                      group=pos$group,
+                                      label=pos$text,
+                                      # color=object$highlight_color,
+                                      data=pos,
+                                      offset=unit(5,"mm"),
+                                      text_only = TRUE,
+                                      size=2)
+      }
     } else {
       plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
                                                       aes(filter=.data$.ggraph.orig_index 

@@ -16,6 +16,7 @@ highlight_node(
   shape_number = NULL,
   shape_size = NULL,
   shape_color = NULL,
+  shape_with_text = NULL,
   glow_size = 1.2,
   override_text = FALSE
 )
@@ -41,6 +42,9 @@ specified by `highlight_color` (default: FALSE, use the raw color of the nodes)}
 \item{shape_size}{shape size}
 
 \item{shape_color}{shape color}
+
+\item{shape_with_text}{if specified, show text along with shape (21 only)
+using `geomtextpath`}
 
 \item{glow_size}{argument to control how big the glowing will be}
 
