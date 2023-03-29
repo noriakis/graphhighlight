@@ -1,6 +1,6 @@
 Package: graphhighlight
 Type: Package
-Title: graphhighlight
+Title: highlighting nodes and edges of graph plot
 Version: 0.1.0
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
 Description: This package highlights the components of ggraph plot like edges and nodes by various strategies including changing the color and stack the layer of the other shapes.

@@ -13,6 +13,9 @@ devtools::install_github("noriakis/graphhighlight")
 
 ## Usage
 
+The detailed usage can be found in [the pkgdown
+documentation](https://noriakis.github.io/software/graphhighlight).
+
 ``` r
 library(ggraph)
 library(igraph)
