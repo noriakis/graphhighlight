@@ -124,7 +124,10 @@ ggraph(g, layout="kk")+
                  highlight_by_shape = TRUE,
                  shape_with_text = "this node is interesting",
                  shape_size = 21,
-                 textpath_params=list(size=3))+
+                 textpath_params=list(size=3,
+                  text_only=TRUE,
+                  offset=unit(5,"mm"),
+                  bg.colour="grey"))+
   coord_fixed()+
   theme_graph()
 ```
