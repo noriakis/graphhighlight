@@ -34,6 +34,9 @@ highlight_node <- function(node_name=NULL,
                            shape_size=NULL,
                            shape_color=NULL,
                            shape_with_text=NULL,
+                           text_color="black",
+                           text_offset=unit(5,"mm"),
+                           text_size=3,
                            glow_size=1.2,
                            override_text=FALSE,
                            use_ggfx=NULL,
@@ -50,6 +53,9 @@ highlight_node <- function(node_name=NULL,
                  shape_size = shape_size,
                  shape_color = shape_color,
                  shape_with_text = shape_with_text,
+                 text_color = text_color, 
+                 text_offset = text_offset,
+                 text_size = text_size,
                  override_text = override_text,
                  use_ggfx = use_ggfx,
                  ggfx_params = ggfx_params),
@@ -132,33 +138,9 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
                                                           %in% candidate_node_id))),
                                          geom_param_list))
         if (!is.null(object$shape_with_text)) {
-          build <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index
-                                            %in% candidate_node_id,]
-          t <- seq(1, -1, length.out = 1000) * pi
-          build$ssize <- sqrt(build$size)/pi/.pt ## Better specification
-          pos <- do.call(rbind,
-                    sapply(seq_len(length(row.names(build))),
-                          function(row) {
-                            data.frame(
-                            x=as.numeric(build[row,"x"]) + 
-                              sin(t)*build[row,"ssize"],
-                            y=as.numeric(build[row,"y"]) + 
-                              cos(t)*build[row,"ssize"],
-                            text=object$shape_with_text,
-                            group=row
-                            )
-                          },
-              simplify=FALSE)) |> data.frame()
-          plot <- plot + geom_textpath(x=pos$x,
-                                        y=pos$y,
-                                        straight=FALSE,
-                                        group=pos$group,
-                                        label=pos$text,
-                                        # color=object$highlight_color,
-                                        data=pos,
-                                        offset=unit(5,"mm"),
-                                        text_only = TRUE,
-                                        size=2)
+          plot <- append_textpath(plot, candl, candidate_node_id,
+            object$shape_with_text, object$text_color, object$text_offset,
+            object$text_size)
         }
       } else {
         plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
@@ -207,4 +189,38 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
                          geom_param_list))
   }
   plot+scale_alpha(range=c(0.01, 0.1),guide="none")
+}
+
+#' @noRd
+append_textpath <- function(plot, candl, candidate_node_id,
+            shape_with_text, text_color, text_offset, text_size) {
+  build <- ggplot_build(plot)$data
+  ## Take the last layer in which the shape has been added
+  build <- build[[length(build)]]
+  t <- seq(1, -1, length.out = 1000) * pi
+  build$ssize <- sqrt(build$size)/pi/.pt ## Better specification
+  pos <- do.call(rbind,
+            sapply(seq_len(length(row.names(build))),
+                  function(row) {
+                    data.frame(
+                    x=as.numeric(build[row,"x"]) + 
+                      sin(t)*build[row,"ssize"],
+                    y=as.numeric(build[row,"y"]) + 
+                      cos(t)*build[row,"ssize"],
+                    text=shape_with_text,
+                    group=row
+                    )
+                  },
+      simplify=FALSE)) |> data.frame()
+  plot <- plot + geom_textpath(x=pos$x,
+                                y=pos$y,
+                                straight=FALSE,
+                                group=pos$group,
+                                label=pos$text,
+                                data=pos,
+                                color = text_color,
+                                offset=text_offset,
+                                text_only = TRUE,
+                                size=text_size)
+  plot
 }

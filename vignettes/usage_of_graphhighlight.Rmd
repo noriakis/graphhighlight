@@ -112,6 +112,23 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
+Further, using `geom_textpath` in `geomtextpath` package, the text annotation can be added to nodes.
+
+```{r node7}
+library(geomtextpath)
+ggraph(g, layout="kk")+
+  geom_edge_link()+
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  highlight_node(filter="size>7",
+                 highlight_by_shape = TRUE,
+                 shape_with_text = "this node is interesting",
+                 shape_size = 21,
+                 text_size=3)+
+  coord_fixed()+
+  theme_graph()
+```
+
 ### highlight_edge
 
 Edges can be highlighted in the same way as `highlight_node`.
