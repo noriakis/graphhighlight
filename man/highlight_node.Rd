@@ -17,13 +17,12 @@ highlight_node(
   shape_size = NULL,
   shape_color = NULL,
   shape_with_text = NULL,
-  text_color = "black",
-  text_offset = unit(5, "mm"),
-  text_size = 3,
+  with_text = NULL,
   glow_size = 1.2,
   override_text = FALSE,
   use_ggfx = NULL,
-  ggfx_params = list()
+  ggfx_params = list(),
+  textpath_params = list()
 )
 }
 \arguments{
@@ -50,6 +49,8 @@ specified by `highlight_color` (default: FALSE, use the raw color of the nodes)}
 
 \item{shape_with_text}{if specified, show text along with shape (21 only)
 using `geomtextpath`}
+
+\item{with_text}{if specified, show text around the nodes, not the shape}
 
 \item{glow_size}{argument to control how big the glowing will be}
 

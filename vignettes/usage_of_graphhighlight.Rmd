@@ -124,7 +124,7 @@ ggraph(g, layout="kk")+
                  highlight_by_shape = TRUE,
                  shape_with_text = "this node is interesting",
                  shape_size = 21,
-                 text_size=3)+
+                 textpath_params=list(size=3))+
   coord_fixed()+
   theme_graph()
 ```
@@ -241,6 +241,39 @@ ggraph(g, layout="circle") +
   highlight_node(filter="size>0",glow=TRUE,glow_base_size = TRUE)+
   highlight_edge(filter="weight>0",glow=TRUE,glow_base_size = TRUE)+
   theme_graph()
+```
+
+```{r combine2, fig.width=15, fig.height=15}
+g <- sample_forestfire(nodes = 300, fw.prob = 0.01)
+E(g)$weight <- sample(seq(0.1, 100, 0.1),
+  length(E(g)), replace=TRUE)
+V(g)$size <- sample(seq(0.1, 100, 0.1), 
+  length(V(g)), replace=TRUE)
+V(g)$name <- unlist(strsplit(gsub(" ","",
+  stringi::stri_rand_lipsum(1)), ""))[1:length(V(g))]
+
+ggraph(g, layout="kk") + 
+  geom_edge_diagonal(aes(color=weight, width=weight))+
+  scale_edge_width(range=c(0.1,1))+
+  scale_edge_color_viridis(option="C", guide="none")+
+  highlight_edge(filter="weight>50", highlight_color = NULL,
+                 use_ggfx="with_outer_glow",
+                 ggfx_params = list(colour="red",expand=1))+
+  geom_node_point(aes(color=size, size=size))+
+  highlight_node(filter="size<50", use_ggfx="with_outer_glow",
+                 ggfx_params = list(colour="white",expand=2.5))+
+  ## Above code is same as stacking the layer:
+  ## with_outer_glow(geom_node_point(aes(filter=size<50)),
+  ##                 colour="white", expand=2.5)+
+  highlight_node(filter="size>70", with_text="Lorem ipsum dolor sit amet",
+                 textpath_params=list(color = "white",
+                                      text_only=TRUE,
+                                      size=2))+
+  highlight_node(filter="size>50", glow=TRUE, glow_base_size = TRUE)+
+  scale_color_viridis(option="B")+
+  coord_fixed()+
+  theme_graph()+
+  theme(panel.background = element_rect(fill = 'black'))
 ```
 
 

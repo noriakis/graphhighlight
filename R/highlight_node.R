@@ -14,6 +14,7 @@
 #' @param shape_color shape color 
 #' @param shape_with_text if specified, show text along with shape (21 only)
 #' using `geomtextpath`
+#' @param with_text if specified, show text around the nodes, not the shape
 #' @param glow_size argument to control how big the glowing will be
 #' @param override_text after highlighting, stack the last geom_node_text layer
 #' @param use_ggfx use ggfx geom to highlight, default to NULL
@@ -34,13 +35,12 @@ highlight_node <- function(node_name=NULL,
                            shape_size=NULL,
                            shape_color=NULL,
                            shape_with_text=NULL,
-                           text_color="black",
-                           text_offset=unit(5,"mm"),
-                           text_size=3,
+                           with_text=NULL,
                            glow_size=1.2,
                            override_text=FALSE,
                            use_ggfx=NULL,
-                           ggfx_params=list()) {
+                           ggfx_params=list(),
+                           textpath_params=list()) {
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
                  filter = filter,
@@ -53,12 +53,11 @@ highlight_node <- function(node_name=NULL,
                  shape_size = shape_size,
                  shape_color = shape_color,
                  shape_with_text = shape_with_text,
-                 text_color = text_color, 
-                 text_offset = text_offset,
-                 text_size = text_size,
+                 with_text = with_text,
                  override_text = override_text,
                  use_ggfx = use_ggfx,
-                 ggfx_params = ggfx_params),
+                 ggfx_params = ggfx_params,
+                 textpath_params = textpath_params),
             class = "highlight_node")
 }
 
@@ -71,6 +70,7 @@ highlight_node <- function(node_name=NULL,
 #' @export
 ggplot_add.highlight_node <- function(object, plot, object_name) {
   
+  if (!is.null(object$with_text)) {object$shape_with_text <- NULL}
   if (!is.null(object$shape_with_text)) {object$shape_number <- 21}
 
   nd <- get_nodes()(plot$data)
@@ -89,9 +89,10 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
     st <- plot$layers[[l]]$geom
     if (sum(grepl("GeomPoint", attributes(st)$class))>0){
       if (!is.null(candl)) {
-        message("multiple geom_node_point found, taking the last layer")
+        message("multiple geom_node_point found, taking the first layer")
+      } else {
+        candl <- l
       }
-      candl <- l
     }
   }
   if (is.null(candl)) {stop("No geom_node_point found")}
@@ -120,33 +121,36 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
       )
     )
   } else {
-
     if (object$glow) {
       plot <- glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
         object$glow_fixed_color, object$highlight_color, object$glow_size)  
     } else {
-      if (object$highlight_by_shape) {
-        if (is.null(object$shape_number)) {stop("Please specify shape")}
-        if (is.null(object$shape_size)) {stop("Please specify shape size")}
-        geom_param_list[["shape"]] <- object$shape_number
-        base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index
-         %in% candidate_node_id,]$size
-        geom_param_list[["size"]] <- base_size + object$shape_size
-        geom_param_list[["color"]] <- object$shape_color
-        plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
-                                                        aes(filter=.data$.ggraph.orig_index 
-                                                          %in% candidate_node_id))),
-                                         geom_param_list))
-        if (!is.null(object$shape_with_text)) {
-          plot <- append_textpath(plot, candl, candidate_node_id,
-            object$shape_with_text, object$text_color, object$text_offset,
-            object$text_size)
-        }
+      if (!is.null(object$with_text)) {
+          plot <- append_textpath(plot=plot, candl=candl, candidate_node_id=candidate_node_id,
+            shape_with_text=object$with_text, along_with="node", textpath_params=object$textpath_params)
       } else {
-        plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
-                                                        aes(filter=.data$.ggraph.orig_index 
-                                                          %in% candidate_node_id))),
-                                         geom_param_list))      
+        if (object$highlight_by_shape) {
+          if (is.null(object$shape_number)) {stop("Please specify shape")}
+          if (is.null(object$shape_size)) {stop("Please specify shape size")}
+          geom_param_list[["shape"]] <- object$shape_number
+          base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index
+           %in% candidate_node_id,]$size
+          geom_param_list[["size"]] <- base_size + object$shape_size
+          geom_param_list[["color"]] <- object$shape_color
+          plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
+                                                          aes(filter=.data$.ggraph.orig_index 
+                                                            %in% candidate_node_id))),
+                                           geom_param_list))
+          if (!is.null(object$shape_with_text)) {
+            plot <- append_textpath(plot=plot, candl=candl, candidate_node_id=candidate_node_id,
+              shape_with_text=object$shape_with_text, along_with="shape", textpath_params=object$textpath_params)
+          }
+        } else {
+          plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
+                                                          aes(filter=.data$.ggraph.orig_index 
+                                                            %in% candidate_node_id))),
+                                           geom_param_list))      
+        }
       }
     }
   }
@@ -193,10 +197,14 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
 
 #' @noRd
 append_textpath <- function(plot, candl, candidate_node_id,
-            shape_with_text, text_color, text_offset, text_size) {
+            shape_with_text, along_with, textpath_params) {
   build <- ggplot_build(plot)$data
-  ## Take the last layer in which the shape has been added
-  build <- build[[length(build)]]
+  if (along_with=="shape") {
+    ## Take the last layer in which the shape has been added
+    build <- build[[length(build)]]
+  } else {
+    build <- build[[candl]][plot$data$.ggraph.orig_index %in% candidate_node_id,]
+  }
   t <- seq(1, -1, length.out = 1000) * pi
   build$ssize <- sqrt(build$size)/pi/.pt ## Better specification
   pos <- do.call(rbind,
@@ -212,15 +220,13 @@ append_textpath <- function(plot, candl, candidate_node_id,
                     )
                   },
       simplify=FALSE)) |> data.frame()
-  plot <- plot + geom_textpath(x=pos$x,
-                                y=pos$y,
-                                straight=FALSE,
-                                group=pos$group,
-                                label=pos$text,
-                                data=pos,
-                                color = text_color,
-                                offset=text_offset,
-                                text_only = TRUE,
-                                size=text_size)
+  ## [TODO] change the colors according to some node params
+  textpath_params[["x"]] <- pos$x
+  textpath_params[["y"]] <- pos$y
+  textpath_params[["group"]] <- pos$group
+  textpath_params[["label"]] <- pos$text
+  textpath_params[["data"]] <- pos
+
+  plot <- plot + do.call(geom_textpath, textpath_params)
   plot
 }
