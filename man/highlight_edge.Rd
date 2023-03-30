@@ -14,7 +14,9 @@ highlight_edge(
   glow = FALSE,
   glow_fixed_color = FALSE,
   glow_base_size = FALSE,
-  glow_edge_size = 0.3
+  glow_edge_size = 0.3,
+  use_ggfx = NULL,
+  ggfx_params = list()
 )
 }
 \arguments{
@@ -39,6 +41,10 @@ specified by `highlight_color` (default: FALSE, use the raw color of the nodes)}
 \item{glow_base_size}{use base size of the node for initial size of glowing}
 
 \item{glow_edge_size}{argument to control how big the glowing will be}
+
+\item{use_ggfx}{use ggfx geom to highlight, default to NULL}
+
+\item{ggfx_params}{ggfx parameters}
 }
 \description{
 highlight_edge

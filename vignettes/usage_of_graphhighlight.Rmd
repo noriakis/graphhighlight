@@ -99,6 +99,19 @@ ggraph(g, layout="nicely")+
 
 The same glowing function is implemented for highlighting edges in `highlight_edge`, but not for `highlight_node_text` as for the text, `shadowtext` by Prof. Guangchuang Yu implmented in `geom_node_text` and `geom_text_repel` can highlight the text much better.
 
+`highlight_node` and `highlight_edge` accept various filter functions in `ggfx`, which can be specified by `use_ggfx` and `ggfx_params` as parameters.
+
+```{r node6}
+library(ggfx)
+ggraph(g, layout="nicely")+
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  highlight_node(filter="size<7",
+                 use_ggfx="with_outer_glow",
+                 ggfx_params=list(color="red"))+
+  theme_graph()
+```
+
 ### highlight_edge
 
 Edges can be highlighted in the same way as `highlight_node`.

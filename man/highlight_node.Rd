@@ -18,7 +18,9 @@ highlight_node(
   shape_color = NULL,
   shape_with_text = NULL,
   glow_size = 1.2,
-  override_text = FALSE
+  override_text = FALSE,
+  use_ggfx = NULL,
+  ggfx_params = list()
 )
 }
 \arguments{
@@ -49,6 +51,10 @@ using `geomtextpath`}
 \item{glow_size}{argument to control how big the glowing will be}
 
 \item{override_text}{after highlighting, stack the last geom_node_text layer}
+
+\item{use_ggfx}{use ggfx geom to highlight, default to NULL}
+
+\item{ggfx_params}{ggfx parameters}
 }
 \description{
 highlight_node

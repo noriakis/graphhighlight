@@ -14,11 +14,14 @@
 #' specified by `highlight_color` (default: FALSE, use the raw color of the nodes)
 #' @param glow_base_size use base size of the node for initial size of glowing
 #' @param glow_edge_size argument to control how big the glowing will be
+#' @param use_ggfx use ggfx geom to highlight, default to NULL
+#' @param ggfx_params ggfx parameters
 #' @export
 highlight_edge <- function(edge_name=NULL,
   highlight_color="red", directed=TRUE, filter=NULL,
   change_label_color=TRUE, glow=FALSE, glow_fixed_color=FALSE,
-  glow_base_size=FALSE, glow_edge_size=0.3) {
+  glow_base_size=FALSE, glow_edge_size=0.3, use_ggfx=NULL,
+  ggfx_params=list()) {
 
   structure(list(edge_name = edge_name,
                  highlight_color = highlight_color,
@@ -27,7 +30,9 @@ highlight_edge <- function(edge_name=NULL,
                  change_label_color = change_label_color,
                  glow_fixed_color=glow_fixed_color,
                  glow_base_size=glow_base_size,
-                 glow_edge_size=glow_edge_size),
+                 glow_edge_size=glow_edge_size,
+                 use_ggfx=use_ggfx,
+                 ggfx_params=ggfx_params),
             class = "highlight_edge")
 }
 
@@ -131,17 +136,28 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   #                                   aes(filter=edge.id %in% candidate_edge_id)),
   #                                 color=object$highlight_color,show.legend=FALSE)
 
-  if (object$glow) {
-    glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list,
-      object$highlight_color, object$glow_fixed_color, object$glow_base_size,
-      build, candl, object$glow_edge_size)
+  if (!is.null(object$use_ggfx)) {
+    plot <- plot + do.call(
+      eval(parse(text=object$use_ggfx)),
+      c(list(
+        x=do.call(eval(parse(text = geom)),
+              c(list(mapping=c(aes_list,aes(filter=.data$edge.id %in% candidate_edge_id))),
+                geom_param_list))
+        ),
+      object$ggfx_params
+      )
+    )
   } else {
-    plot + do.call(eval(parse(text = geom)),
-      c(list(mapping=c(aes_list,aes(filter=.data$edge.id %in% candidate_edge_id))),
-         geom_param_list))    
+    if (object$glow) {
+      glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list,
+        object$highlight_color, object$glow_fixed_color, object$glow_base_size,
+        build, candl, object$glow_edge_size)
+    } else {
+      plot + do.call(eval(parse(text = geom)),
+        c(list(mapping=c(aes_list,aes(filter=.data$edge.id %in% candidate_edge_id))),
+           geom_param_list))    
+    }
   }
-
-  
 }
 
 

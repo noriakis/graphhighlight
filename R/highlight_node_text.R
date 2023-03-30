@@ -94,6 +94,7 @@ ggplot_add.highlight_node_text <- function(object, plot, object_name) {
 
   ## Storing the other params
   aes_params <- plot$layers[[candl]]$aes_params
+
   plot + do.call(geom_node_text,
                  c(aes_params,
                   list(mapping=aes_list),
