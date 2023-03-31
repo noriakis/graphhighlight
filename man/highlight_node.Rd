@@ -10,14 +10,14 @@ highlight_node(
   highlight_color = NULL,
   filter = NULL,
   glow = FALSE,
-  glow_fixed_color = FALSE,
   glow_base_size = FALSE,
-  highlight_by_shape = FALSE,
   shape_number = NULL,
   shape_size = NULL,
   shape_color = NULL,
   shape_with_text = NULL,
   with_text = NULL,
+  text_attribute = NULL,
+  text_node_color = FALSE,
   glow_size = 1.2,
   override_text = FALSE,
   use_ggfx = NULL,
@@ -34,12 +34,7 @@ highlight_node(
 
 \item{glow}{use glow highlighting}
 
-\item{glow_fixed_color}{use glow highlighting with fixed color,
-specified by `highlight_color` (default: FALSE, use the raw color of the nodes)}
-
 \item{glow_base_size}{use base size of the node for initial size of glowing}
-
-\item{highlight_by_shape}{boolean, use shape highlighting}
 
 \item{shape_number}{shape number}
 
@@ -51,6 +46,10 @@ specified by `highlight_color` (default: FALSE, use the raw color of the nodes)}
 using `geomtextpath`}
 
 \item{with_text}{if specified, show text around the nodes, not the shape}
+
+\item{text_attribute}{if not NULL, graph attributes of this name will be used as text annotation}
+
+\item{text_node_color}{if TRUE, node color will be used as text color}
 
 \item{glow_size}{argument to control how big the glowing will be}
 

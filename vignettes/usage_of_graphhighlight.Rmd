@@ -49,14 +49,12 @@ ggraph(g, layout="nicely")+
   theme_graph()
 ```
 
-Or highlighting by some shapes by stacking the layers.
-`highlight_by_shape` specifies highlighting by shape is to be used, and `specify_shape` the shape, `specify_shape_size` the size, `shape_color` the color of the shape.
+Or highlighting by some shapes by stacking the layers. If `specify_shape` is specified, the nodes can be highlighted by shape, and `specify_shape_size` determines the size, `shape_color` the color of the shape.
 
 ```{r node2}
 ggraph(g, layout="nicely")+
   geom_node_point(aes(size=size))+
   highlight_node(filter="size>7",
-                 highlight_by_shape = TRUE,
                  shape_number = 21,
                  shape_size = 21,
                  shape_color="red")+
@@ -73,15 +71,14 @@ ggraph(g, layout="nicely")+
   highlight_node(filter="size>7",glow=TRUE)+
   theme_graph()
 ```
-If `highlight_color` is specified and `glow_fixed_color` is `TRUE`, that color is used.
+If `highlight_color` is specified, that color is used.
 
 ```{r node4}
 ggraph(g, layout="nicely")+
   geom_node_point(aes(size=size, color=size))+
   scale_color_viridis()+
   highlight_node(filter="size>7",glow=TRUE,
-                 highlight_color="tomato",
-                 glow_fixed_color=TRUE)+
+                 highlight_color="tomato")+
   theme_graph()
 ```
 
@@ -99,7 +96,7 @@ ggraph(g, layout="nicely")+
 
 The same glowing function is implemented for highlighting edges in `highlight_edge`, but not for `highlight_node_text` as for the text, `shadowtext` by Prof. Guangchuang Yu implmented in `geom_node_text` and `geom_text_repel` can highlight the text much better.
 
-`highlight_node` and `highlight_edge` accept various filter functions in `ggfx`, which can be specified by `use_ggfx` and `ggfx_params` as parameters.
+`highlight_node` and `highlight_edge` accept various filter functions in `ggfx`, which can be specified by `use_ggfx` and `ggfx_params` as parameters. This is same as stacking the layer of `geom_node_text` with filtering function.
 
 ```{r node6}
 library(ggfx)
@@ -121,7 +118,6 @@ ggraph(g, layout="kk")+
   geom_node_point(aes(size=size, color=size))+
   scale_color_viridis()+
   highlight_node(filter="size>7",
-                 highlight_by_shape = TRUE,
                  shape_with_text = "this node is interesting",
                  shape_size = 21,
                  textpath_params=list(size=3,
@@ -131,6 +127,27 @@ ggraph(g, layout="kk")+
   coord_fixed()+
   theme_graph()
 ```
+
+By default, texts specified in `shape_with_text` or `with_text` (without the shape) is annotated to all the nodes. If `text_attribute` is set, the node attributes of the same name is taken and plotted like the example below. `text_attribute` will override the former parameters. If `text_node_color` is set to `TRUE`, node color will be used as text color.
+
+```{r node8}
+V(g)$text <- unlist(strsplit(stringi::stri_rand_lipsum(1), " "))[1:length(V(g))]
+ggraph(g, layout="nicely")+
+  geom_edge_link()+
+  geom_node_point(aes(size=size, color=size))+
+  scale_color_viridis()+
+  highlight_node(filter="size>7",
+                 with_text = "this node is interesting", # whatever not NULL
+                 text_attribute="text",
+                 text_node_color=TRUE,
+                 textpath_params=list(size=3,
+                  text_only=TRUE,
+                  offset=unit(5,"mm"),
+                  bg.colour="tomato"))+
+  coord_fixed()+
+  theme_graph()
+```
+
 
 ### highlight_edge
 
