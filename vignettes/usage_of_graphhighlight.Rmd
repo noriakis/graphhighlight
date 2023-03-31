@@ -105,7 +105,7 @@ ggraph(g, layout="nicely")+
   scale_color_viridis()+
   highlight_node(filter="size<7",
                  use_ggfx="with_outer_glow",
-                 ggfx_params=list(color="red"))+
+                 ggfx_params=list(colour="red",expand=5))+
   theme_graph()
 ```
 
@@ -264,7 +264,8 @@ ggraph(g, layout="circle") +
 ```
 
 ```{r combine2, fig.width=15, fig.height=15}
-g <- sample_forestfire(nodes = 300, fw.prob = 0.01)
+set.seed(42)
+g <- sample_forestfire(nodes = 200, fw.prob = 0.01)
 E(g)$weight <- sample(seq(0.1, 100, 0.1),
   length(E(g)), replace=TRUE)
 V(g)$size <- sample(seq(0.1, 100, 0.1), 
