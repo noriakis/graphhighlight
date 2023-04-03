@@ -1,5 +1,5 @@
 url: ~
 template:
   bootstrap: 5
-destination: ../docs/software/graphhighlight
+destination: ../software/docs/software/graphhighlight
 
