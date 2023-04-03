@@ -60,7 +60,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
       tos <- object$edge_name[,2]
     }
 
-    if ("name" %in% colnames(ed)) {
+    if ("name" %in% colnames(plot$data)) {
       subset_column <- "name"
     } else {
       subset_column <- ".ggraph.orig_index"
