@@ -142,8 +142,8 @@ ggraph(g, layout="nicely")+
                  text_node_color=TRUE,
                  textpath_params=list(size=3,
                   text_only=TRUE,
-                  offset=unit(5,"mm"),
-                  bg.colour="tomato"))+
+                  offset=unit(4,"mm"),
+                  bg.colour="black"))+
   coord_fixed()+
   theme_graph()
 ```
