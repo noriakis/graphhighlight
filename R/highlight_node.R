@@ -18,6 +18,7 @@
 #' @param override_text after highlighting, stack the last geom_node_text layer
 #' @param use_ggfx use ggfx geom to highlight, default to NULL
 #' @param ggfx_params ggfx parameters
+#' @param circ_size circle size for text highlighting
 #' @importFrom rlang .data
 #' @importFrom ggplot2 aes ggplot_build scale_alpha
 #' @importFrom ggraph get_nodes get_edges geom_node_text geom_node_point
@@ -39,7 +40,8 @@ highlight_node <- function(node_name=NULL,
                            override_text=FALSE,
                            use_ggfx=NULL,
                            ggfx_params=list(),
-                           textpath_params=list()) {
+                           textpath_params=list(),
+                           circ_size=circ_size) {
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
                  filter = filter,
@@ -56,7 +58,8 @@ highlight_node <- function(node_name=NULL,
                  override_text = override_text,
                  use_ggfx = use_ggfx,
                  ggfx_params = ggfx_params,
-                 textpath_params = textpath_params),
+                 textpath_params = textpath_params,
+                 circ_size=circ_size),
             class = "highlight_node")
 }
 
@@ -127,7 +130,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
       if (!is.null(object$with_text)) {
           plot <- append_textpath(plot=plot, candl=candl, candidate_node_id=candidate_node_id,
             shape_with_text=object$with_text, along_with="node", textpath_params=object$textpath_params,
-            text_attribute=object$text_attribute, text_node_color=object$text_node_color)
+            text_attribute=object$text_attribute, text_node_color=object$text_node_color, circ_size=object$circ_size)
       } else {
         if (!is.null(object$shape_number)) {
           if (is.null(object$shape_number)) {stop("Please specify shape")}
@@ -146,7 +149,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
               shape_with_text=object$shape_with_text, along_with="shape",
               textpath_params=object$textpath_params,
               text_attribute=object$text_attribute,
-              text_node_color=object$text_node_color)
+              text_node_color=object$text_node_color,circ_size=object$circ_size)
           }
         } else {
           plot <- plot + do.call(geom_node_point,c(list(mapping=c(aes_list,
@@ -201,7 +204,7 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
 #' @noRd
 append_textpath <- function(plot, candl, candidate_node_id,
             shape_with_text, along_with, textpath_params,
-            text_attribute, text_node_color) {
+            text_attribute, text_node_color, circ_size) {
   build <- ggplot_build(plot)$data
   if (along_with=="shape") {
     ## Take the last layer in which the shape has been added
@@ -209,7 +212,7 @@ append_textpath <- function(plot, candl, candidate_node_id,
   } else {
     build <- build[[candl]][plot$data$.ggraph.orig_index %in% candidate_node_id,]
   }
-  t <- seq(1, -1, length.out = 1000) * pi
+  t <- seq(circ_size, -1*circ_size, length.out = 1000) * pi
   build$ssize <- sqrt(build$size)/pi/.pt ## Better specification
   pos <- do.call(rbind,
             sapply(seq_len(length(row.names(build))),
@@ -238,7 +241,6 @@ append_textpath <- function(plot, candl, candidate_node_id,
   textpath_params[["label"]] <- pos$text
   textpath_params[["data"]] <- pos
   textpath_params[["color"]] <- pos$color
-
   plot <- plot + do.call(geom_textpath, textpath_params)
   plot
 }

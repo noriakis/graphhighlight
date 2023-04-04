@@ -22,7 +22,8 @@ highlight_node(
   override_text = FALSE,
   use_ggfx = NULL,
   ggfx_params = list(),
-  textpath_params = list()
+  textpath_params = list(),
+  circ_size = circ_size
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ using `geomtextpath`}
 \item{use_ggfx}{use ggfx geom to highlight, default to NULL}
 
 \item{ggfx_params}{ggfx parameters}
+
+\item{circ_size}{circle size for text highlighting}
 }
 \description{
 highlight_node
