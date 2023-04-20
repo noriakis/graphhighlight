@@ -26,7 +26,7 @@ highlight_edge <- function(edge_name=NULL,
   structure(list(edge_name = edge_name,
                  highlight_color = highlight_color,
                  directed = directed,
-                 filter = filter, glow=glow,
+                 filter = enquo(filter), glow=glow,
                  change_label_color = change_label_color,
                  glow_fixed_color=glow_fixed_color,
                  glow_base_size=glow_base_size,
@@ -46,7 +46,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   ed <- get_edges()(plot$data)
   ## TODO: no text evaluation
   if (!is.null(object$filter)) {
-    ed <- subset(ed, eval(parse(text=object$filter)))
+    ed <- ed |> dplyr::filter(!!object$filter)
   }
 
 

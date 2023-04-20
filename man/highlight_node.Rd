@@ -23,7 +23,7 @@ highlight_node(
   use_ggfx = NULL,
   ggfx_params = list(),
   textpath_params = list(),
-  circ_size = circ_size
+  circ_size = 1.1
 )
 }
 \arguments{

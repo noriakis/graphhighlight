@@ -19,7 +19,7 @@ highlight_node_label <- function(node_name=NULL,
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
                  highlight_bg_color=highlight_bg_color,
-                 filter = filter,
+                 filter = enquo(filter),
                  seed=seed
                  ),
             class = "highlight_node_label")
@@ -35,7 +35,7 @@ ggplot_add.highlight_node_label <- function(object, plot, object_name) {
 
   nd <- get_nodes()(plot$data)
   if (!is.null(object$filter)) {
-    nd <- subset(nd, eval(parse(text=object$filter)))
+    nd <- nd |> filter(!!object$filter)
   }
   if (!is.null(object$node_name)) {
     nd <- nd[ nd$name %in% object$node_name, ]

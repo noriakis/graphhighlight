@@ -44,7 +44,7 @@ highlight_node <- function(node_name=NULL,
                            circ_size=1.1) {
   structure(list(node_name = node_name,
                  highlight_color = highlight_color,
-                 filter = filter,
+                 filter = enquo(filter),
                  glow = glow,
                  glow_base_size = glow_base_size,
                  glow_size=glow_size,
@@ -68,6 +68,7 @@ highlight_node <- function(node_name=NULL,
 #' @param plot The ggplot object to add object to
 #' @param object_name The name of the object to add
 #' @importFrom ggplot2 ggplot_add
+#' @importFrom dplyr filter
 #' @export ggplot_add.highlight_node
 #' @export
 ggplot_add.highlight_node <- function(object, plot, object_name) {
@@ -78,7 +79,8 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   nd <- get_nodes()(plot$data)
   ## TODO: no text evaluation
   if (!is.null(object$filter)) {
-    nd <- subset(nd, eval(parse(text=object$filter)))
+    nd <- nd |> filter(!!object$filter)
+    # nd <- subset(nd, eval(parse(text=object$filter)))
   }
   if (!is.null(object$node_name)) {
     nd <- nd[ nd$name %in% object$node_name, ]
