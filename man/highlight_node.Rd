@@ -19,6 +19,7 @@ highlight_node(
   text_attribute = NULL,
   text_node_color = FALSE,
   glow_size = 1.2,
+  glow_base_size_manual = 5,
   override_text = FALSE,
   use_ggfx = NULL,
   ggfx_params = list(),
@@ -53,6 +54,8 @@ using `geomtextpath`}
 \item{text_node_color}{if TRUE, node color will be used as text color}
 
 \item{glow_size}{argument to control how big the glowing will be}
+
+\item{glow_base_size_manual}{initial base size if glow_base_size is FALSE}
 
 \item{override_text}{after highlighting, stack the last geom_node_text layer}
 

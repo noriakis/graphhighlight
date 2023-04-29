@@ -5,7 +5,9 @@
 #' @param highlight_color highlighting color
 #' @param filter used to subset node data specified as string
 #' @param glow use glow highlighting
+#' @param glow_size argument to control how big the glowing will be
 #' @param glow_base_size use base size of the node for initial size of glowing
+#' @param glow_base_size_manual initial base size if glow_base_size is FALSE
 #' @param shape_number shape number
 #' @param shape_size shape size
 #' @param shape_color shape color 
@@ -14,7 +16,6 @@
 #' @param with_text if specified, show text around the nodes, not the shape
 #' @param text_attribute if not NULL, graph attributes of this name will be used as text annotation
 #' @param text_node_color if TRUE, node color will be used as text color
-#' @param glow_size argument to control how big the glowing will be
 #' @param override_text after highlighting, stack the last geom_node_text layer
 #' @param use_ggfx use ggfx geom to highlight, default to NULL
 #' @param ggfx_params ggfx parameters
@@ -37,6 +38,7 @@ highlight_node <- function(node_name=NULL,
                            text_attribute=NULL,
                            text_node_color=FALSE,
                            glow_size=1.2,
+                           glow_base_size_manual=5,
                            override_text=FALSE,
                            use_ggfx=NULL,
                            ggfx_params=list(),
@@ -47,6 +49,7 @@ highlight_node <- function(node_name=NULL,
                  filter = enquo(filter),
                  glow = glow,
                  glow_base_size = glow_base_size,
+                 glow_base_size_manual = glow_base_size_manual,
                  glow_size=glow_size,
                  shape_number = shape_number,
                  shape_size = shape_size,
@@ -72,7 +75,8 @@ highlight_node <- function(node_name=NULL,
 #' @export ggplot_add.highlight_node
 #' @export
 ggplot_add.highlight_node <- function(object, plot, object_name) {
-  
+
+  raw_filter <- NULL
   if (!is.null(object$with_text)) {object$shape_with_text <- NULL}
   if (!is.null(object$shape_with_text)) {object$shape_number <- 21}
 
@@ -109,7 +113,10 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   geom_param_list[["show.legend"]] <- FALSE
   geom_param_list["na.rm"] <- NULL
   aes_list <- plot$layers[[candl]]$mapping
-  aes_list["filter"] <- NULL
+  if (!is.null(aes_list["filter"])) {
+    raw_filter <- aes_list[["filter"]]
+    aes_list["filter"] <- NULL
+  }
 
 
   if (!is.null(object$use_ggfx)) {
@@ -127,7 +134,7 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   } else {
     if (object$glow) {
       plot <- glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
-        object$highlight_color, object$glow_size)  
+        object$highlight_color, object$glow_size, object$glow_base_size_manual, raw_filter)  
     } else {
       if (!is.null(object$with_text)) {
           plot <- append_textpath(plot=plot, candl=candl, candidate_node_id=candidate_node_id,
@@ -172,9 +179,11 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
 #' @noRd
 glow_nodes <- function(plot, aes_list, candidate_node_id,
                        geom_param_list, glow_base_size, candl,
-                       highlight_color, glow_size) {
-  layers <- 10
-  size <- 8
+                       highlight_color, glow_size, glow_base_size_manual,
+                       raw_filter) {
+
+  layers <- 10 ## stacking layer number
+  size <- glow_base_size_manual
   aes_list[["fill"]] <- NA
   geom_param_list[["fill"]] <- NA
   aes_list[["alpha"]] <- 1
@@ -186,7 +195,11 @@ glow_nodes <- function(plot, aes_list, candidate_node_id,
   }
 
   if (glow_base_size) {
-    base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index %in% candidate_node_id,]$size
+    if (is.null(raw_filter)) {
+      base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index %in% candidate_node_id,]$size
+    } else {
+      base_size <- ggplot_build(plot)$data[[candl]]$size
+    }
   }
 
   for (i in seq_len(layers+1)){
