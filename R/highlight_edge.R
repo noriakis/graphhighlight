@@ -14,6 +14,7 @@
 #' specified by `highlight_color` (default: FALSE, use the raw color of the nodes)
 #' @param glow_base_size use base size of the node for initial size of glowing
 #' @param glow_edge_size argument to control how big the glowing will be
+#' @param glow_base_size_manual use this base size if glow_base_size is FALSE
 #' @param use_ggfx use ggfx geom to highlight, default to NULL
 #' @param ggfx_params ggfx parameters
 #' @export
@@ -21,6 +22,7 @@ highlight_edge <- function(edge_name=NULL,
   highlight_color="red", directed=TRUE, filter=NULL,
   change_label_color=TRUE, glow=FALSE, glow_fixed_color=FALSE,
   glow_base_size=FALSE, glow_edge_size=0.3, use_ggfx=NULL,
+  glow_base_size_manual=0.01,
   ggfx_params=list()) {
 
   structure(list(edge_name = edge_name,
@@ -31,6 +33,7 @@ highlight_edge <- function(edge_name=NULL,
                  glow_fixed_color=glow_fixed_color,
                  glow_base_size=glow_base_size,
                  glow_edge_size=glow_edge_size,
+                 glow_base_size_manual=glow_base_size_manual,
                  use_ggfx=use_ggfx,
                  ggfx_params=ggfx_params),
             class = "highlight_edge")
@@ -43,6 +46,8 @@ highlight_edge <- function(edge_name=NULL,
 #' @export ggplot_add.highlight_edge
 #' @export
 ggplot_add.highlight_edge <- function(object, plot, object_name) {
+  raw_filter <- NULL
+
   ed <- get_edges()(plot$data)
   ## TODO: no text evaluation
   if (!is.null(object$filter)) {
@@ -151,7 +156,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
     if (object$glow) {
       glow_edges(plot, geom, aes_list, candidate_edge_id, geom_param_list,
         object$highlight_color, object$glow_fixed_color, object$glow_base_size,
-        build, candl, object$glow_edge_size)
+        build, candl, object$glow_edge_size, object$glow_base_size_manual, raw_filter)
     } else {
       plot + do.call(eval(parse(text = geom)),
         c(list(mapping=c(aes_list,aes(filter=.data$edge.id %in% candidate_edge_id))),
@@ -162,9 +167,9 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
 
 
 glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list,
-  highlight_color, glow_fixed_color, glow_base_size, build, candl, glow_edge_size) {
+  highlight_color, glow_fixed_color, glow_base_size, build, candl, glow_edge_size, glow_base_size_manual, raw_filter) {
   layers <- 10
-  edge_size <- 0.01
+  edge_size <- glow_base_size_manual
   geom_param_list[["position"]] <- "identity"
   aes_list["width"] <- NULL
   aes_list[["edge_alpha"]] <- 1
