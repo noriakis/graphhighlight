@@ -102,6 +102,7 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   # ggplotify::as.ggplot(ggplot_gtable(build))
   
   ## Plan 2
+  ## [TODO] link0 not supported
   for (l in seq_along(plot$layers)) {
     st <- plot$layers[[l]]$stat
     if (sum(grepl("StatEdge", attributes(st)$class))>0){
@@ -128,11 +129,15 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   current_end_cap <- unique(build$data[[candl]]$end_cap)
   current_start_cap <- unique(build$data[[candl]]$start_cap)
   # minimum_edge_width <- min(build$data[[candl]]$edge_width)
-  if (!is.na(current_end_cap)) {
-    geom_param_list[["end_cap"]] <- current_end_cap
+  if (!is.null(current_end_cap)) {
+    if (!is.na(current_end_cap)) {
+      geom_param_list[["end_cap"]] <- current_end_cap
+    }
   }
-  if (!is.na(current_start_cap)) {
-    geom_param_list[["start_cap"]] <- current_start_cap
+  if (!is.null(current_start_cap)) {
+    if (!is.na(current_start_cap)) {
+      geom_param_list[["start_cap"]] <- current_start_cap
+    }
   }
   if (object$change_label_color) {
     geom_param_list[["label_colour"]] <- object$highlight_color
