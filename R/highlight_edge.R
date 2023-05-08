@@ -17,12 +17,14 @@
 #' @param glow_base_size_manual use this base size if glow_base_size is FALSE
 #' @param use_ggfx use ggfx geom to highlight, default to NULL
 #' @param ggfx_params ggfx parameters
+#' @param manual_layer manually specify layer number
+#' @param manual_geom manually specify geom
 #' @export
 highlight_edge <- function(edge_name=NULL,
   highlight_color="red", directed=TRUE, filter=NULL,
   change_label_color=TRUE, glow=FALSE, glow_fixed_color=FALSE,
   glow_base_size=FALSE, glow_edge_size=0.3, use_ggfx=NULL,
-  glow_base_size_manual=0.01,
+  glow_base_size_manual=0.01, manual_layer=NULL, manual_geom=NULL,
   ggfx_params=list()) {
 
   structure(list(edge_name = edge_name,
@@ -35,7 +37,9 @@ highlight_edge <- function(edge_name=NULL,
                  glow_edge_size=glow_edge_size,
                  glow_base_size_manual=glow_base_size_manual,
                  use_ggfx=use_ggfx,
-                 ggfx_params=ggfx_params),
+                 ggfx_params=ggfx_params,
+                 manual_layer=manual_layer,
+                 manual_geom=manual_geom),
             class = "highlight_edge")
 }
 
@@ -103,18 +107,34 @@ ggplot_add.highlight_edge <- function(object, plot, object_name) {
   
   ## Plan 2
   ## [TODO] link0 not supported
-  for (l in seq_along(plot$layers)) {
-    st <- plot$layers[[l]]$stat
-    if (sum(grepl("StatEdge", attributes(st)$class))>0){
-      candl <- l
-      cl <- attributes(st)$class
-      se <- cl[which(sapply(cl, function(x) grepl("StatEdge",x)))]
+  if (is.null(object$manual_layer)) {
+    for (l in seq_along(plot$layers)) {
+      st <- plot$layers[[l]]$stat
+      if (sum(grepl("StatEdge", attributes(st)$class))>0){
+        candl <- l
+        cl <- attributes(st)$class
+        se <- cl[which(sapply(cl, function(x) grepl("StatEdge",x)))]
+      }
     }
+    se <- tolower(se)
+  } else {
+    st <- plot$layers[[object$manual_layer]]$stat
+    candl <- object$manual_layer
+    cl <- attributes(st)$class
+    se <- cl[which(sapply(cl, function(x) grepl("StatEdge",x)))]
+    se <- tolower(se)
   }
-  se <- tolower(se)
-  geom <- paste0("geom_",substr(se, 5, 8),"_",substr(se, 9, nchar(se)))
+  if (is.null(object$manual_geom)) {
+    geom <- paste0("geom_",substr(se, 5, 8),"_",substr(se, 9, nchar(se)))
+  } else {
+    geom <- object$manual_geom
+  }
   aes_list <- plot$layers[[candl]]$mapping
-  aes_list["filter"] <- NULL
+
+  if (!is.null(aes_list["filter"])) {
+    raw_filter <- aes_list[["filter"]]
+    aes_list["filter"] <- NULL
+  }
 
   ## Do not reflect to legends
   geom_param_list <- plot$layers[[candl]]$geom_params
@@ -182,7 +202,8 @@ glow_edges <- function (plot, geom, aes_list, candidate_edge_id, geom_param_list
   ## again?
   # ed <- get_edges()(plot$data)
   ed <- build$data[[candl]]
-  base_edge_size <- ed[ed$group %in% candidate_edge_id,]$edge_width
+
+  base_edge_size <- ed$edge_width#ed[ed$group %in% candidate_edge_id,]$edge_width
 
   if (glow_fixed_color) {
     aes_list["color"] <- NULL
