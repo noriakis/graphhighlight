@@ -5,6 +5,7 @@
 #' @param highlight_color highlighting color
 #' @param filter used to subset node data specified as string
 #' @param glow use glow highlighting
+#' @param glow_use_fill use fill for glowing instead of color
 #' @param glow_size argument to control how big the glowing will be
 #' @param glow_base_size use base size of the node for initial size of glowing
 #' @param glow_base_size_manual initial base size if glow_base_size is FALSE
@@ -29,6 +30,7 @@ highlight_node <- function(node_name=NULL,
                            highlight_color=NULL,
                            filter=NULL,
                            glow=FALSE,
+                           glow_use_fill=FALSE,
                            glow_base_size=FALSE,
                            shape_number=NULL,
                            shape_size=NULL,
@@ -48,6 +50,7 @@ highlight_node <- function(node_name=NULL,
                  highlight_color = highlight_color,
                  filter = enquo(filter),
                  glow = glow,
+                 glow_use_fill = glow_use_fill,
                  glow_base_size = glow_base_size,
                  glow_base_size_manual = glow_base_size_manual,
                  glow_size=glow_size,
@@ -134,7 +137,8 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
   } else {
     if (object$glow) {
       plot <- glow_nodes(plot, aes_list, candidate_node_id, geom_param_list, object$glow_base_size, candl,
-        object$highlight_color, object$glow_size, object$glow_base_size_manual, raw_filter)  
+        object$highlight_color, object$glow_size, object$glow_base_size_manual, raw_filter,
+        object$glow_use_fill)  
     } else {
       if (!is.null(object$with_text)) {
           plot <- append_textpath(plot=plot, candl=candl, candidate_node_id=candidate_node_id,
@@ -180,20 +184,24 @@ ggplot_add.highlight_node <- function(object, plot, object_name) {
 glow_nodes <- function(plot, aes_list, candidate_node_id,
                        geom_param_list, glow_base_size, candl,
                        highlight_color, glow_size, glow_base_size_manual,
-                       raw_filter) {
+                       raw_filter, glow_use_fill) {
 
   layers <- 10 ## stacking layer number
   size <- glow_base_size_manual
-  aes_list[["fill"]] <- NA
-  geom_param_list[["fill"]] <- NA
+  # geom_param_list[["fill"]] <- NA
   aes_list[["alpha"]] <- 1
   aes_list["size"] <- NULL
 
   if (!is.null(highlight_color)) {
     aes_list["color"] <- NULL
     geom_param_list[["color"]] <- highlight_color
+  } else {
+	geom_param_list[["color"]] <- aes_list[["color"]]
   }
 
+  if (glow_use_fill) {
+  	geom_param_list[["shape"]] <- 21
+  }
   if (glow_base_size) {
     if (is.null(raw_filter)) {
       base_size <- ggplot_build(plot)$data[[candl]][plot$data$.ggraph.orig_index %in% candidate_node_id,]$size
